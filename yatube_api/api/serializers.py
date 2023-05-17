@@ -16,8 +16,10 @@ class PostSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_comments(self, obj):
-        comments = list(obj.comments.all()[:10])
-        return comments
+        arr = []
+        for comment in obj.comments.all()[:10]:
+            arr.append(CommentSerializer(comment))
+        return arr
 
 
 class GroupSerializer(serializers.ModelSerializer):

@@ -13,7 +13,15 @@ from .serializers import (
     PostSerializer,
     FollowSerializer
 )
-from posts.models import Post, Group
+from posts.models import Post, Group, Follow
+
+
+class WorkingWithViewset(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -53,9 +61,7 @@ class GroupViewSet(
 
 
 class FollowViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
+    WorkingWithViewset
 ):
     serializer_class = FollowSerializer
     permission_classes = (
@@ -65,7 +71,9 @@ class FollowViewSet(
     search_fields = ('following__username',)
 
     def get_queryset(self):
-        return self.request.user.follower.all()
+        return (
+            Follow.objects.select_related('user').
+            filter(user=self.request.user).all())
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
